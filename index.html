@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArcadeVault — Unblocked Browser Games</title>
+    <meta
+      name="description"
+      content="Fast, distraction-free unblocked browser games portal storing each game as an iframe in a JSON catalog."
+    />
+    <meta property="og:title" content="ArcadeVault — Unblocked Browser Games" />
+    <meta
+      property="og:description"
+      content="Fast, distraction-free unblocked browser games portal storing each game as an iframe in a JSON catalog."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="#top" class="brand-wordmark" id="brand-home">ArcadeVault</a>
+
+        <nav class="header-nav" aria-label="Game categories">
+          <button type="button" class="nav-link is-active" data-nav-category="All">All Games</button>
+          <button type="button" class="nav-link" data-nav-category="Arcade">Arcade</button>
+          <button type="button" class="nav-link" data-nav-category="Puzzle">Puzzle</button>
+          <button type="button" class="nav-link" data-nav-category="Action">Action</button>
+          <button type="button" class="nav-link" data-nav-category="Strategy">Strategy</button>
+        </nav>
+
+        <div class="header-actions">
+          <button type="button" class="btn-primary" id="random-game-btn">Play Random</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top" class="page-main">
+      <!-- Active Iframe Game Stage (hidden until a game is launched) -->
+      <section
+        id="player-stage"
+        class="player-stage"
+        aria-label="Active game player"
+        hidden
+      >
+        <div class="stage-bar">
+          <div class="stage-title-group">
+            <h2 id="stage-game-title" class="stage-title">Game Title</h2>
+            <p id="stage-game-meta" class="stage-meta">Category · Controls</p>
+          </div>
+          <div class="stage-controls">
+            <button type="button" class="btn-ghost" id="stage-favorite-btn" aria-pressed="false">
+              Save Favorite
+            </button>
+            <button type="button" class="btn-ghost" id="stage-reload-btn">Reload</button>
+            <button type="button" class="btn-ghost" id="stage-theater-btn" aria-pressed="false">
+              Theater View
+            </button>
+            <button type="button" class="btn-ghost" id="stage-fullscreen-btn">Fullscreen</button>
+            <button type="button" class="btn-secondary" id="stage-close-btn">Close</button>
+          </div>
+        </div>
+
+        <div class="stage-viewport" id="stage-viewport">
+          <div id="iframe-mount" class="iframe-mount"></div>
+        </div>
+
+        <div class="stage-footer">
+          <p class="stage-controls-hint">
+            <span class="mono-label">Controls:</span>
+            <span id="stage-controls-text">Keyboard or Mouse</span>
+          </p>
+          <div class="stage-quick-switch" id="stage-quick-switch" aria-label="Switch game"></div>
+        </div>
+      </section>
+
+      <!-- Hero Spotlight (shown when no game is actively loaded) -->
+      <section id="hero-section" class="hero-section" aria-label="Featured game">
+        <div class="hero-copy">
+          <p class="hero-kicker">Instant Browser Play · Zero Downloads</p>
+          <h1 class="hero-headline">
+            Classic arcade and logic games, ready in one click.
+          </h1>
+          <p class="hero-subcopy">
+            Every title loads directly inside an isolated iframe from the local JSON catalog—fast startup, keyboard-ready, and saved high scores in your browser.
+          </p>
+          <div class="hero-cta-row">
+            <button type="button" class="btn-primary btn-lg" id="hero-play-featured">
+              Play Featured: Grid Snake
+            </button>
+            <a href="#catalog" class="btn-secondary btn-lg">Browse Catalog</a>
+          </div>
+        </div>
+
+        <div class="hero-media-card" id="hero-featured-card">
+          <div class="media-frame">
+            <img
+              id="hero-featured-img"
+              src="/src/assets/images/cover_grid_snake_1795052502523.jpg"
+              alt="Grid Snake featured game artwork"
+              referrerpolicy="no-referrer"
+            />
+          </div>
+          <div class="hero-media-caption">
+            <div>
+              <h2 class="caption-title" id="hero-featured-title">Grid Snake</h2>
+              <p class="caption-meta" id="hero-featured-meta">Arcade · 1 Player · Arrow Keys</p>
+            </div>
+            <button type="button" class="btn-ghost" id="hero-featured-launch">Launch</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Catalog Section -->
+      <section id="catalog" class="catalog-section" aria-label="Game catalog">
+        <div class="catalog-toolbar">
+          <div class="catalog-heading-row">
+            <div>
+              <h2 class="section-title">Game Library</h2>
+              <p class="section-subtitle" id="catalog-count-label">Loading games from JSON catalog...</p>
+            </div>
+            <div class="catalog-utility-actions">
+              <button type="button" class="btn-ghost" id="open-json-btn">View JSON</button>
+              <button type="button" class="btn-secondary" id="open-add-modal-btn">Add Iframe</button>
+            </div>
+          </div>
+
+          <div class="catalog-filters-row">
+            <div class="filter-tabs" role="tablist" aria-label="Filter games by category" id="filter-tabs">
+              <button type="button" class="filter-tab is-active" data-category="All" role="tab" aria-selected="true">All</button>
+              <button type="button" class="filter-tab" data-category="Arcade" role="tab" aria-selected="false">Arcade</button>
+              <button type="button" class="filter-tab" data-category="Puzzle" role="tab" aria-selected="false">Puzzle</button>
+              <button type="button" class="filter-tab" data-category="Action" role="tab" aria-selected="false">Action</button>
+              <button type="button" class="filter-tab" data-category="Strategy" role="tab" aria-selected="false">Strategy</button>
+              <button type="button" class="filter-tab" data-category="Favorites" role="tab" aria-selected="false">Favorites</button>
+            </div>
+
+            <div class="search-box">
+              <label for="game-search" class="sr-only">Search games</label>
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+              <input
+                type="search"
+                id="game-search"
+                class="search-input"
+                placeholder="Search games..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div id="games-grid" class="games-grid" aria-live="polite"></div>
+
+        <div id="catalog-empty" class="catalog-empty" hidden>
+          <p class="empty-title">No matching games found</p>
+          <p class="empty-copy">Try clearing your search query or switching back to All Games.</p>
+          <button type="button" class="btn-secondary" id="reset-filters-btn">Reset Filters</button>
+        </div>
+
+        <div id="catalog-error" class="catalog-empty" hidden>
+          <p class="empty-title">Unable to load games.json</p>
+          <p class="empty-copy" id="catalog-error-msg">Check that /games.json is reachable.</p>
+          <button type="button" class="btn-secondary" id="retry-load-btn">Retry</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p class="footer-brand">ArcadeVault · Static JSON Iframe Portal</p>
+        <div class="footer-links">
+          <a href="#top">Back to Top</a>
+          <a href="#catalog">All Games</a>
+          <button type="button" class="footer-link-btn" id="footer-json-btn">games.json</button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Add Custom Iframe Game Modal -->
+    <dialog id="add-game-dialog" class="modal-dialog" aria-labelledby="add-dialog-title">
+      <form id="add-game-form" class="modal-card" method="dialog">
+        <div class="modal-header">
+          <h3 id="add-dialog-title" class="modal-title">Add Game Iframe</h3>
+          <button type="button" class="btn-ghost" id="close-add-dialog">Close</button>
+        </div>
+        <p class="modal-desc">
+          Add a game entry stored as an <code class="inline-code">&lt;iframe&gt;</code> in your browser's catalog alongside <code class="inline-code">games.json</code>.
+        </p>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="new-game-title" class="form-label">Game Title</label>
+            <input type="text" id="new-game-title" class="form-input" required maxlength="48" placeholder="e.g. Retro Pong" />
+          </div>
+
+          <div class="form-field">
+            <label for="new-game-category" class="form-label">Category</label>
+            <select id="new-game-category" class="form-input">
+              <option value="Arcade">Arcade</option>
+              <option value="Puzzle">Puzzle</option>
+              <option value="Action">Action</option>
+              <option value="Strategy">Strategy</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="new-game-iframe" class="form-label">Iframe HTML or Embed URL</label>
+          <textarea
+            id="new-game-iframe"
+            class="form-input form-textarea"
+            rows="3"
+            required
+            placeholder='<iframe src="/games/snake.html" title="Custom Game" allow="fullscreen"></iframe>'
+          ></textarea>
+          <span class="form-hint">Paste a full &lt;iframe&gt; tag or an https:// / relative URL.</span>
+        </div>
+
+        <div class="form-field">
+          <label for="new-game-controls" class="form-label">Controls Hint</label>
+          <input type="text" id="new-game-controls" class="form-input" maxlength="64" placeholder="Arrow Keys / Mouse" />
+        </div>
+
+        <div class="form-field">
+          <label for="new-game-desc" class="form-label">Short Description</label>
+          <input type="text" id="new-game-desc" class="form-input" maxlength="140" placeholder="Quick summary of how to play." />
+        </div>
+
+        <p id="add-game-error" class="form-error" hidden></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="cancel-add-dialog">Cancel</button>
+          <button type="submit" class="btn-primary">Add to Catalog</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- View / Export games.json Modal -->
+    <dialog id="json-dialog" class="modal-dialog" aria-labelledby="json-dialog-title">
+      <div class="modal-card modal-card-wide">
+        <div class="modal-header">
+          <h3 id="json-dialog-title" class="modal-title">Catalog JSON (<code class="inline-code">games.json</code>)</h3>
+          <button type="button" class="btn-ghost" id="close-json-dialog">Close</button>
+        </div>
+        <p class="modal-desc">
+          Each game is stored with its own <code class="inline-code">&lt;iframe&gt;</code> definition. Copy or download this JSON to update <code class="inline-code">public/games.json</code>.
+        </p>
+        <pre id="json-preview-code" class="json-preview"></pre>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="copy-json-btn">Copy JSON</button>
+          <button type="button" class="btn-primary" id="download-json-btn">Download games.json</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

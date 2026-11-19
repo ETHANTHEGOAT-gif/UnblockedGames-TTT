@@ -1,0 +1,68 @@
+[
+  {
+    "id": "grid-snake",
+    "title": "Grid Snake",
+    "category": "Arcade",
+    "players": "1 Player",
+    "controls": "Arrow Keys or WASD · Space to Pause",
+    "description": "Steer across the grid, collect fruit to grow longer, and switch between solid walls or wrap-around borders.",
+    "thumbnail": "/src/assets/images/cover_grid_snake_1795052502523.jpg",
+    "featured": true,
+    "iframe": "<iframe src=\"/games/snake.html\" title=\"Grid Snake\" allow=\"fullscreen\" loading=\"lazy\"></iframe>"
+  },
+  {
+    "id": "tiles-2048",
+    "title": "2048 Tiles",
+    "category": "Puzzle",
+    "players": "1 Player",
+    "controls": "Arrow Keys, WASD, or Swipe · Undo Supported",
+    "description": "Slide numbered tiles across the 4×4 board to combine matching values and reach the 2048 tile.",
+    "thumbnail": "/src/assets/images/cover_2048_tiles_1795052503747.jpg",
+    "featured": false,
+    "iframe": "<iframe src=\"/games/2048.html\" title=\"2048 Tiles\" allow=\"fullscreen\" loading=\"lazy\"></iframe>"
+  },
+  {
+    "id": "brick-breaker",
+    "title": "Brick Breaker",
+    "category": "Arcade",
+    "players": "1 Player",
+    "controls": "Mouse or Left/Right Arrows · Space to Launch",
+    "description": "Deflect the energy ball with your paddle to clear layered brick formations and catch power-up capsules.",
+    "thumbnail": "/src/assets/images/cover_brick_breaker_1795052504068.jpg",
+    "featured": false,
+    "iframe": "<iframe src=\"/games/breakout.html\" title=\"Brick Breaker\" allow=\"fullscreen\" loading=\"lazy\"></iframe>"
+  },
+  {
+    "id": "minesweeper",
+    "title": "Minesweeper",
+    "category": "Puzzle",
+    "players": "1 Player",
+    "controls": "Left Click to Reveal · Right Click or Toggle to Flag",
+    "description": "Uncover safe grid squares using adjacent mine counts across Beginner, Intermediate, and Expert boards.",
+    "thumbnail": "/src/assets/images/cover_minesweeper_1795052504752.jpg",
+    "featured": false,
+    "iframe": "<iframe src=\"/games/minesweeper.html\" title=\"Minesweeper\" allow=\"fullscreen\" loading=\"lazy\"></iframe>"
+  },
+  {
+    "id": "meteor-blaster",
+    "title": "Meteor Blaster",
+    "category": "Action",
+    "players": "1 Player",
+    "controls": "W / Up to Thrust · A / D to Rotate · Space to Fire",
+    "description": "Pilot an agile vector fighter through drifting asteroid waves and split incoming boulders before impact.",
+    "thumbnail": "/src/assets/images/cover_meteor_blaster_1795052505338.jpg",
+    "featured": false,
+    "iframe": "<iframe src=\"/games/asteroids.html\" title=\"Meteor Blaster\" allow=\"fullscreen\" loading=\"lazy\"></iframe>"
+  },
+  {
+    "id": "four-in-row",
+    "title": "Four in a Row",
+    "category": "Strategy",
+    "players": "1–2 Players",
+    "controls": "Click a Column or Keys 1–7 to Drop a Disc",
+    "description": "Connect four discs horizontally, vertically, or diagonally against a tactical computer opponent or a friend.",
+    "thumbnail": "/src/assets/images/cover_four_in_row_1795052505977.jpg",
+    "featured": false,
+    "iframe": "<iframe src=\"/games/connect4.html\" title=\"Four in a Row\" allow=\"fullscreen\" loading=\"lazy\"></iframe>"
+  }
+]

@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minesweeper</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0e14;
+        --panel: #141923;
+        --border: #252d3b;
+        --text: #f3f4f6;
+        --muted: #9ca3af;
+        --accent: #f97316;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 14px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, sans-serif;
+        user-select: none;
+      }
+      .toolbar {
+        width: 100%;
+        max-width: 540px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 14px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .stats {
+        display: flex;
+        gap: 18px;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat-label { display: block; font-size: 11px; color: var(--muted); }
+      .stat-val { font-size: 17px; font-weight: 700; }
+      .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+      button, select {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 7px 11px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: #1c2330;
+        color: var(--text);
+        cursor: pointer;
+      }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #0b0d11; }
+      button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+      .board-scroll {
+        max-width: 100%;
+        overflow: auto;
+        padding: 10px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .grid {
+        display: grid;
+        gap: 3px;
+      }
+      .cell {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 5px;
+        border: 1px solid #303a4b;
+        background: #232b3a;
+        color: var(--text);
+      }
+      .cell:hover:not(:disabled) { background: #2c3648; }
+      .cell.revealed {
+        background: #10141d;
+        border-color: #1b2230;
+        cursor: default;
+      }
+      .cell.mine-hit { background: #991b1b; border-color: #ef4444; }
+      .cell.flagged { color: #fb7185; }
+      .n1 { color: #60a5fa; }
+      .n2 { color: #34d399; }
+      .n3 { color: #fb7185; }
+      .n4 { color: #a78bfa; }
+      .n5 { color: #fbbf24; }
+      .n6 { color: #2dd4bf; }
+      .n7 { color: #e5e7eb; }
+      .n8 { color: #9ca3af; }
+      .status-banner {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        min-height: 20px;
+      }
+      .status-banner.win { color: #34d399; }
+      .status-banner.loss { color: #fb7185; }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <div class="stats">
+        <div><span class="stat-label">Mines Left</span><span class="stat-val" id="mines-el">10</span></div>
+        <div><span class="stat-label">Time</span><span class="stat-val" id="time-el">0s</span></div>
+      </div>
+      <div class="actions">
+        <select id="diff-select" aria-label="Difficulty">
+          <option value="9,9,10">9×9 (10 Mines)</option>
+          <option value="12,12,22">12×12 (22 Mines)</option>
+          <option value="14,14,32">14×14 (32 Mines)</option>
+        </select>
+        <button type="button" id="flag-mode-btn" aria-pressed="false">Flag Mode</button>
+        <button type="button" class="primary" id="reset-btn">New Board</button>
+      </div>
+    </div>
+
+    <div class="board-scroll">
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="status-banner" id="status-el">Left click to reveal · Right click to flag</div>
+
+    <script>
+      const gridEl = document.getElementById('grid');
+      const minesEl = document.getElementById('mines-el');
+      const timeEl = document.getElementById('time-el');
+      const diffSelect = document.getElementById('diff-select');
+      const flagModeBtn = document.getElementById('flag-mode-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const statusEl = document.getElementById('status-el');
+
+      let rows = 9, cols = 9, totalMines = 10;
+      let board = [];
+      let firstClick = true;
+      let gameOver = false;
+      let flagMode = false;
+      let flagsUsed = 0;
+      let revealedCount = 0;
+      let seconds = 0;
+      let timerId = null;
+
+      function startTimer() {
+        if (timerId) return;
+        timerId = setInterval(() => {
+          seconds += 1;
+          timeEl.textContent = `${seconds}s`;
+        }, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerId);
+        timerId = null;
+      }
+
+      function initBoard() {
+        stopTimer();
+        [rows, cols, totalMines] = diffSelect.value.split(',').map(Number);
+        board = Array.from({ length: rows }, () =>
+          Array.from({ length: cols }, () => ({ mine: false, revealed: false, flagged: false, adj: 0 }))
+        );
+        firstClick = true;
+        gameOver = false;
+        flagsUsed = 0;
+        revealedCount = 0;
+        seconds = 0;
+        timeEl.textContent = '0s';
+        minesEl.textContent = String(totalMines);
+        statusEl.className = 'status-banner';
+        statusEl.textContent = 'Left click to reveal · Right click to flag';
+        renderGrid();
+      }
+
+      function placeMines(safeR, safeC) {
+        let placed = 0;
+        while (placed < totalMines) {
+          const r = Math.floor(Math.random() * rows);
+          const c = Math.floor(Math.random() * cols);
+          if (board[r][c].mine) continue;
+          if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+          board[r][c].mine = true;
+          placed++;
+        }
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (board[r][c].mine) continue;
+            let count = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                const nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].mine) count++;
+              }
+            }
+            board[r][c].adj = count;
+          }
+        }
+      }
+
+      function revealCell(r, c) {
+        if (gameOver) return;
+        const cell = board[r][c];
+        if (cell.revealed || cell.flagged) return;
+
+        if (firstClick) {
+          firstClick = false;
+          placeMines(r, c);
+          startTimer();
+        }
+
+        if (cell.mine) {
+          cell.revealed = true;
+          cell.hit = true;
+          gameOver = true;
+          stopTimer();
+          for (let rr = 0; rr < rows; rr++) {
+            for (let cc = 0; cc < cols; cc++) {
+              if (board[rr][cc].mine) board[rr][cc].revealed = true;
+            }
+          }
+          statusEl.className = 'status-banner loss';
+          statusEl.textContent = 'Mine triggered — Click New Board to try again.';
+          renderGrid();
+          return;
+        }
+
+        const queue = [[r, c]];
+        while (queue.length) {
+          const [cr, cc] = queue.shift();
+          const cur = board[cr][cc];
+          if (cur.revealed || cur.flagged) continue;
+          cur.revealed = true;
+          revealedCount++;
+          if (cur.adj === 0) {
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                const nr = cr + dr, nc = cc + dc;
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !board[nr][nc].revealed) {
+                  queue.push([nr, nc]);
+                }
+              }
+            }
+          }
+        }
+
+        if (revealedCount === rows * cols - totalMines) {
+          gameOver = true;
+          stopTimer();
+          statusEl.className = 'status-banner win';
+          statusEl.textContent = `Board cleared in ${seconds}s!`;
+        }
+        renderGrid();
+      }
+
+      function toggleFlag(r, c) {
+        if (gameOver) return;
+        const cell = board[r][c];
+        if (cell.revealed) return;
+        cell.flagged = !cell.flagged;
+        flagsUsed += cell.flagged ? 1 : -1;
+        minesEl.textContent = String(Math.max(0, totalMines - flagsUsed));
+        renderGrid();
+      }
+
+      function renderGrid() {
+        gridEl.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
+        gridEl.innerHTML = '';
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = board[r][c];
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cell';
+            if (cell.revealed) {
+              btn.classList.add('revealed');
+              btn.disabled = true;
+              if (cell.mine) {
+                btn.textContent = '✸';
+                if (cell.hit) btn.classList.add('mine-hit');
+              } else if (cell.adj > 0) {
+                btn.textContent = String(cell.adj);
+                btn.classList.add(`n${cell.adj}`);
+              }
+            } else if (cell.flagged) {
+              btn.textContent = '⚑';
+              btn.classList.add('flagged');
+            }
+
+            btn.addEventListener('click', () => {
+              if (flagMode) toggleFlag(r, c);
+              else revealCell(r, c);
+            });
+            btn.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+              toggleFlag(r, c);
+            });
+            gridEl.appendChild(btn);
+          }
+        }
+      }
+
+      flagModeBtn.addEventListener('click', () => {
+        flagMode = !flagMode;
+        flagModeBtn.setAttribute('aria-pressed', String(flagMode));
+      });
+      diffSelect.addEventListener('change', initBoard);
+      resetBtn.addEventListener('click', initBoard);
+
+      initBoard();
+    </script>
+  </body>
+</html>
